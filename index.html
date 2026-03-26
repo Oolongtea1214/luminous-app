@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luminous Talent OS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #7367AE;
+    --primary-light: #EAE8F7;
+    --primary-dark: #5A519A;
+    --primary-mid: #9B93C8;
+    --bg: #F7F7FB;
+    --surface: #FFFFFF;
+    --border: #E8E7F0;
+    --text-1: #1A1830;
+    --text-2: #5B5878;
+    --text-3: #9490B0;
+    --success: #2DB27D;
+    --success-bg: #EAF7F2;
+    --warning: #E6A817;
+    --warning-bg: #FEF6E4;
+    --danger: #E05252;
+    --danger-bg: #FEF0F0;
+    --info: #3B82F6;
+    --info-bg: #EBF2FF;
+    --sidebar-w: 240px;
+    --right-w: 320px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-1); min-height: 100vh; display: flex; flex-direction: column; }
+  
+  /* TOPBAR */
+  .topbar { height: 58px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; width: var(--sidebar-w); flex-shrink: 0; }
+  .logo-icon { width: 28px; height: 28px; background: var(--primary); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 16px; height: 16px; fill: white; }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--text-1); letter-spacing: -0.3px; }
+  .logo-text span { color: var(--primary); }
+  .topbar-search { flex: 1; max-width: 420px; position: relative; }
+  .topbar-search input { width: 100%; height: 36px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0 14px 0 36px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-1); outline: none; transition: border-color 0.2s; }
+  .topbar-search input:focus { border-color: var(--primary-mid); background: white; }
+  .topbar-search input::placeholder { color: var(--text-3); }
+  .topbar-search .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-3); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .topbar-badge { position: relative; cursor: pointer; }
+  .topbar-badge svg { color: var(--text-2); }
+  .badge-dot { position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; background: var(--danger); border-radius: 50%; border: 1.5px solid white; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; cursor: pointer; }
+  .period-badge { background: var(--primary-light); color: var(--primary); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 6px; }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; min-height: 0; }
+  
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; padding: 12px 0; position: sticky; top: 58px; height: calc(100vh - 58px); overflow-y: auto; }
+  .sidebar-section { padding: 0 10px; margin-bottom: 4px; }
+  .sidebar-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-3); padding: 8px 10px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; cursor: pointer; font-size: 13.5px; font-weight: 400; color: var(--text-2); transition: all 0.15s; margin-bottom: 1px; }
+  .nav-item:hover { background: var(--bg); color: var(--text-1); }
+  .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 500; }
+  .nav-item svg { flex-shrink: 0; opacity: 0.8; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-count { margin-left: auto; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; }
+  .sidebar-footer { margin-top: auto; padding: 12px 10px; border-top: 1px solid var(--border); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 9px; cursor: pointer; }
+  .user-card:hover { background: var(--bg); }
+  .user-info p { font-size: 13px; font-weight: 500; color: var(--text-1); }
+  .user-info span { font-size: 11px; color: var(--text-3); }
+
+  /* MAIN */
+  .main { flex: 1; min-width: 0; display: flex; overflow: hidden; }
+  .content { flex: 1; min-width: 0; overflow-y: auto; padding: 28px 28px; }
+  .page { display: none; }
+  .page.active { display: block; }
+  
+  /* RIGHT PANEL */
+  .right-panel { width: var(--right-w); background: var(--surface); border-left: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; }
+  .panel-header { padding: 20px 20px 0; }
+  .panel-header h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-1); }
+  .panel-header p { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+  .ai-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; margin-top: 8px; }
+  .ai-badge::before { content: ''; width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+  /* KPI CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; cursor: pointer; transition: box-shadow 0.2s, transform 0.2s; }
+  .kpi-card:hover { box-shadow: 0 4px 20px rgba(115,103,174,0.12); transform: translateY(-1px); }
+  .kpi-card::after { content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 60px; border-radius: 0 14px 0 60px; opacity: 0.07; }
+  .kpi-card.purple::after { background: var(--primary); }
+  .kpi-card.green::after { background: var(--success); }
+  .kpi-card.orange::after { background: var(--warning); }
+  .kpi-card.red::after { background: var(--danger); }
+  .kpi-card.blue::after { background: var(--info); }
+  .kpi-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .kpi-card.purple .kpi-icon { background: var(--primary-light); color: var(--primary); }
+  .kpi-card.green .kpi-icon { background: var(--success-bg); color: var(--success); }
+  .kpi-card.orange .kpi-icon { background: var(--warning-bg); color: var(--warning); }
+  .kpi-card.red .kpi-icon { background: var(--danger-bg); color: var(--danger); }
+  .kpi-card.blue .kpi-icon { background: var(--info-bg); color: var(--info); }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--text-1); line-height: 1; }
+  .kpi-label { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+  .kpi-delta { font-size: 11px; font-weight: 500; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .kpi-delta.up { color: var(--success); }
+  .kpi-delta.down { color: var(--danger); }
+  .kpi-delta.warn { color: var(--warning); }
+
+  /* PAGE TITLE */
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text-1); }
+  .page-header p { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .page-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text-1); }
+
+  /* CHARTS ROW */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .chart-card h3 { font-size: 13px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
+  .chart-card p { font-size: 11px; color: var(--text-3); margin-bottom: 16px; }
+  .chart-wrap { position: relative; height: 160px; }
+  .chart-wrap-sm { position: relative; height: 140px; }
+  .chart-card-wide { grid-column: span 2; }
+
+  /* TABLE */
+  .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .table-header h3 { font-size: 14px; font-weight: 600; color: var(--text-1); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); background: var(--bg); border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; font-size: 13px; color: var(--text-2); border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  .emp-cell { display: flex; align-items: center; gap: 10px; }
+  .emp-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .emp-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
+  .emp-role { font-size: 11px; color: var(--text-3); }
+  .tag { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+  .tag-purple { background: var(--primary-light); color: var(--primary); }
+  .tag-green { background: var(--success-bg); color: var(--success); }
+  .tag-red { background: var(--danger-bg); color: var(--danger); }
+  .tag-orange { background: var(--warning-bg); color: var(--warning); }
+  .tag-blue { background: var(--info-bg); color: var(--info); }
+  .tag-gray { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+  .score-bar { display: flex; align-items: center; gap: 8px; }
+  .score-track { flex: 1; height: 5px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 3px; }
+  .score-num { font-size: 12px; font-weight: 600; color: var(--text-1); min-width: 26px; }
+
+  /* HEATMAP */
+  .heatmap-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 4px; }
+  .heatmap-label { font-size: 11px; color: var(--text-3); display: flex; align-items: center; }
+  .heatmap-col-label { font-size: 10px; font-weight: 600; color: var(--text-3); text-align: center; padding: 4px 0; }
+  .heatmap-cell { height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+  .heatmap-cell:hover { transform: scale(1.06); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+
+  /* ORG DESIGN STUDIO */
+  .org-drop-zone { background: var(--bg); border: 2px dashed var(--border); border-radius: 14px; padding: 18px 16px; min-width: 155px; width: 155px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; display:flex;flex-direction:column;align-items:center;gap:5px; }
+  .org-drop-zone:hover, .org-drop-zone.drag-over { border-color: var(--primary); background: var(--primary-light); transform:scale(1.03); }
+  .org-drop-zone .dz-plus { width:32px;height:32px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text-3);margin-bottom:3px; }
+  .org-drop-zone .dz-title { font-size:12px;font-weight:600;color:var(--text-2); }
+  .org-drop-zone .dz-sub { font-size:11px;color:var(--text-3); }
+  .org-drop-zone.filled { border-style:solid;border-color:var(--border);background:var(--surface); }
+  .org-drop-zone.filled:hover { border-color:var(--danger-bg);background:rgba(224,82,82,0.04); }
+  .org-dept-pill { font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;margin-bottom:6px;display:inline-block; }
+  .org-vert-line { width:2px;height:36px;background:var(--border);margin:0 auto; }
+  .org-horiz { display:flex;position:relative;justify-content:center; }
+  .org-horiz::before { content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--border); }
+  .org-col { display:flex;flex-direction:column;align-items:center;padding:0 16px; }
+  .bench-card { display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:grab;transition:all 0.15s;user-select:none; }
+  .bench-card:hover { border-color:var(--primary-mid);background:var(--primary-light);transform:translateY(-1px);box-shadow:0 3px 10px rgba(115,103,174,0.12); }
+  .bench-card:active { cursor:grabbing; }
+  .bench-av { width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0; }
+  .bench-score { font-size:13px;font-weight:700;margin-left:auto; }
+  .org-ins-tab.active { border-bottom:2px solid var(--primary) !important;color:var(--primary) !important; }
+  .ins-block { background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px;font-size:12px; }
+  .ins-block h4 { font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:5px;display:flex;align-items:center;gap:6px; }
+  .ins-block p { color:var(--text-2);line-height:1.6; }
+
+  /* PROFILE PAGE */
+  .profile-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+  .profile-top { display: flex; align-items: flex-start; gap: 20px; }
+  .profile-avatar { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: white; flex-shrink: 0; }
+  .profile-info h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-1); }
+  .profile-info p { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .profile-tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .profile-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .profile-stat { text-align: center; }
+  .profile-stat-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-1); }
+  .profile-stat-lbl { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .skill-radar-wrap { position: relative; height: 220px; }
+
+  /* AI PANEL */
+  .ai-insight-card { margin: 14px 16px 0; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .ai-insight-card h4 { font-size: 12px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .ai-insight-card p { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+  .role-fit-score { text-align: center; padding: 20px 16px; }
+  .score-ring { width: 100px; height: 100px; margin: 0 auto 12px; position: relative; }
+  .score-ring svg { width: 100%; height: 100%; }
+  .score-ring-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: var(--primary); }
+  .candidate-list { padding: 0 16px; }
+  .candidate-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .candidate-row:last-child { border-bottom: none; }
+  .candidate-row:hover .candidate-name { color: var(--primary); }
+  .candidate-info { flex: 1; min-width: 0; }
+  .candidate-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
+  .candidate-role { font-size: 11px; color: var(--text-3); }
+  .fit-pill { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; }
+  .section-divider { padding: 16px 16px 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-3); border-top: 1px solid var(--border); margin-top: 8px; }
+
+  /* SUCCESSION */
+  .succession-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .succession-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .succession-card h3 { font-size: 13px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
+  .succession-card p { font-size: 11px; color: var(--text-3); margin-bottom: 14px; }
+  .successor-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .successor-row:last-child { border-bottom: none; }
+  .readiness-bar { flex: 1; }
+  .readiness-track { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .readiness-fill { height: 100%; border-radius: 2px; }
+  .readiness-label { font-size: 10px; color: var(--text-3); }
+  .readiness-pct { font-size: 12px; font-weight: 600; color: var(--text-1); }
+
+  /* DEVELOPMENT */
+  .dev-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .dev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; cursor: pointer; transition: all 0.2s; }
+  .dev-card:hover { box-shadow: 0 4px 16px rgba(115,103,174,0.12); transform: translateY(-1px); }
+  .dev-card-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 20px; }
+  .dev-card h3 { font-size: 14px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
+  .dev-card p { font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 14px; }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; }
+  .progress-track { flex: 1; height: 5px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--primary); }
+  .progress-txt { font-size: 12px; font-weight: 600; color: var(--primary); }
+
+  /* REPORTS */
+  .report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .report-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; gap: 12px; transition: all 0.2s; }
+  .report-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .report-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .report-card h3 { font-size: 13px; font-weight: 600; color: var(--text-1); }
+  .report-card p { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+  .report-meta { font-size: 11px; color: var(--text-3); margin-top: auto; }
+
+  /* MINI SPARKLINE */
+  .sparkline { display: flex; align-items: flex-end; gap: 2px; height: 28px; }
+  .spark-bar { width: 6px; border-radius: 2px; background: var(--primary-light); }
+  .spark-bar.high { background: var(--primary); }
+
+  /* ALERTS */
+  .alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 12px; }
+  .alert-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(224,82,82,0.2); }
+  .alert-warning { background: var(--warning-bg); color: #996b00; border: 1px solid rgba(230,168,23,0.25); }
+  .alert-info { background: var(--info-bg); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <span class="logo-text">Luminous <span>TalentOS</span></span>
+  </div>
+  <div class="topbar-search">
+    <span class="search-icon">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    </span>
+    <input type="text" placeholder="Search employees, roles, skills…">
+  </div>
+  <div class="topbar-right">
+    <span class="period-badge">Q2 2025</span>
+    <div class="topbar-badge">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="badge-dot"></span>
+    </div>
+    <div class="topbar-badge">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <div class="avatar">WL</div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Workspace</div>
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('talent')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Talent Pool
+      <span class="nav-count">247</span>
+    </div>
+    <div class="nav-item" onclick="navigate('org')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="2" y="18" width="6" height="4" rx="1"/><rect x="9" y="18" width="6" height="4" rx="1"/><rect x="16" y="18" width="6" height="4" rx="1"/><path d="M12 6v4M12 10H5v4M12 10h7v4"/></svg>
+      Org Design
+    </div>
+    <div class="nav-item" onclick="navigate('succession')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Succession Planning
+      <span class="nav-count" style="background:var(--danger-bg);color:var(--danger)">4</span>
+    </div>
+    <div class="nav-item" onclick="navigate('insights')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      AI Insights
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Programs</div>
+    <div class="nav-item" onclick="navigate('development')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Development Programs
+    </div>
+    <div class="nav-item" onclick="navigate('rolefit')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+      Role Fit AI
+    </div>
+    <div class="nav-item" onclick="navigate('reports')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Luminous Tests
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">System</div>
+    <div class="nav-item" onclick="navigate('settings')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Settings
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar" style="width:28px;height:28px;font-size:10px;">WL</div>
+      <div class="user-info">
+        <p>Wei Lin</p>
+        <span>HR Director</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+<div class="content">
+
+<!-- DASHBOARD PAGE -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Talent Intelligence Dashboard</h1>
+        <p>Luminous Solutions Sdn Bhd · 247 Employees · Last synced 2 mins ago</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-primary">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Employee
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card purple" onclick="navigate('talent')">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="kpi-value">247</div>
+      <div class="kpi-label">Total Employees</div>
+      <div class="kpi-delta up">↑ 12 this quarter</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <div class="kpi-value">83<span style="font-size:16px;color:var(--text-3)">%</span></div>
+      <div class="kpi-label">Profiles Completed</div>
+      <div class="kpi-delta up">↑ 6% from last month</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <div class="kpi-value">38</div>
+      <div class="kpi-label">HiPo Identified</div>
+      <div class="kpi-delta up">↑ 5 from assessment</div>
+    </div>
+    <div class="kpi-card red" onclick="navigate('succession')">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div class="kpi-value">4</div>
+      <div class="kpi-label">Critical Roles at Risk</div>
+      <div class="kpi-delta down">↑ 2 since last review</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      <div class="kpi-value">74<span style="font-size:16px;color:var(--text-3)">%</span></div>
+      <div class="kpi-label">Engagement Index</div>
+      <div class="kpi-delta warn">→ Stable (target 80%)</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="charts-row">
+    <div class="chart-card chart-card-wide">
+      <h3>Headcount & HiPo Growth</h3>
+      <p>Monthly trend across all business units</p>
+      <div class="chart-wrap">
+        <canvas id="growthChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Talent by Department</h3>
+      <p>Distribution across functions</p>
+      <div class="chart-wrap">
+        <canvas id="deptChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECOND CHARTS ROW -->
+  <div class="charts-row" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="chart-card">
+      <h3>Skill Gap Analysis</h3>
+      <p>Current vs required proficiency</p>
+      <div class="chart-wrap">
+        <canvas id="skillGapChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Flight Risk Distribution</h3>
+      <p>Predicted retention risk levels</p>
+      <div class="chart-wrap">
+        <canvas id="riskChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Engagement Trend</h3>
+      <p>6-month eNPS tracking</p>
+      <div class="chart-wrap">
+        <canvas id="engageChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TALENT HEATMAP -->
+  <div class="chart-card" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <h3 style="margin-bottom:2px;">9-Box Talent Heatmap</h3>
+        <p style="font-size:11px;color:var(--text-3);">Performance vs. Potential — 247 employees mapped</p>
+      </div>
+      <button class="btn btn-ghost" style="font-size:12px;" onclick="navigate('talent')">View Full Heatmap →</button>
+    </div>
+    <div class="heatmap-grid">
+      <div></div>
+      <div class="heatmap-col-label">Low Performance</div>
+      <div class="heatmap-col-label">Moderate</div>
+      <div class="heatmap-col-label">High Performance</div>
+      <div class="heatmap-col-label">Very High</div>
+      <div class="heatmap-col-label">Top 10%</div>
+      <div class="heatmap-col-label">Exceptional</div>
+      <div class="heatmap-col-label">Pioneer</div>
+
+      <div class="heatmap-label">High Potential</div>
+      <div class="heatmap-cell" style="background:#E8E5F7;color:#5A519A;" title="4 employees">4</div>
+      <div class="heatmap-cell" style="background:#C9C4EC;color:#3C3489;" title="8 employees">8</div>
+      <div class="heatmap-cell" style="background:#A99ED8;color:#26215C;" title="11 employees">11</div>
+      <div class="heatmap-cell" style="background:#7B6DC5;color:white;" title="16 employees">16</div>
+      <div class="heatmap-cell" style="background:#6257B8;color:white;" title="9 employees">9</div>
+      <div class="heatmap-cell" style="background:#5049A6;color:white;" title="5 employees">5</div>
+      <div class="heatmap-cell" style="background:#3D3890;color:white;" title="2 employees">2</div>
+
+      <div class="heatmap-label">Medium Potential</div>
+      <div class="heatmap-cell" style="background:#F0EEF9;color:#7367AE;" title="9 employees">9</div>
+      <div class="heatmap-cell" style="background:#D9D6F0;color:#534AB7;" title="18 employees">18</div>
+      <div class="heatmap-cell" style="background:#B4AEE2;color:#3C3489;" title="26 employees">26</div>
+      <div class="heatmap-cell" style="background:#9289D0;color:white;" title="22 employees">22</div>
+      <div class="heatmap-cell" style="background:#7367AE;color:white;" title="15 employees">15</div>
+      <div class="heatmap-cell" style="background:#5C50A0;color:white;" title="8 employees">8</div>
+      <div class="heatmap-cell" style="background:#453A88;color:white;" title="3 employees">3</div>
+
+      <div class="heatmap-label">Low Potential</div>
+      <div class="heatmap-cell" style="background:#F5F4FB;color:#9490B0;" title="14 employees">14</div>
+      <div class="heatmap-cell" style="background:#E8E6F5;color:#7367AE;" title="22 employees">22</div>
+      <div class="heatmap-cell" style="background:#CCCAF0;color:#534AB7;" title="18 employees">18</div>
+      <div class="heatmap-cell" style="background:#B0AADF;color:#3C3489;" title="12 employees">12</div>
+      <div class="heatmap-cell" style="background:#8A84C8;color:white;" title="7 employees">7</div>
+      <div class="heatmap-cell" style="background:#6E67B8;color:white;" title="4 employees">4</div>
+      <div class="heatmap-cell" style="background:#514996;color:white;" title="1 employee">1</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:12px;">
+      <span style="font-size:11px;color:var(--text-3)">Lower density</span>
+      <div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,#F0EEF9,#3D3890)"></div>
+      <span style="font-size:11px;color:var(--text-3)">Higher density</span>
+    </div>
+  </div>
+
+  <!-- RECENT EMPLOYEES TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Recent Activity — Talent Movements</h3>
+      <button class="btn btn-ghost" style="font-size:12px;" onclick="navigate('talent')">View All →</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Department</th>
+          <th>Potential</th>
+          <th>Role Fit</th>
+          <th>Flight Risk</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="navigate('profile')" style="cursor:pointer;">
+          <td><div class="emp-cell"><div class="emp-avatar" style="background:#EAE8F7;color:#7367AE;">SR</div><div><div class="emp-name">Siti Rahmah binti Ahmad</div><div class="emp-role">Senior Data Analyst</div></div></div></td>
+          <td>Product & Analytics</td>
+          <td><span class="tag tag-orange">★ HiPo</span></td>
+          <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:91%;background:var(--success)"></div></div><span class="score-num">91</span></div></td>
+          <td><span class="tag tag-green">Low</span></td>
+          <td><span class="tag tag-purple">Promotion Ready</span></td>
+        </tr>
+        <tr>
+          <td><div class="emp-cell"><div class="emp-avatar" style="background:#EBF2FF;color:#3B82F6;">KL</div><div><div class="emp-name">Khoo Lik Seng</div><div class="emp-role">Engineering Manager</div></div></div></td>
+          <td>Technology</td>
+          <td><span class="tag tag-orange">★ HiPo</span></td>
+          <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:85%;background:var(--success)"></div></div><span class="score-num">85</span></div></td>
+          <td><span class="tag tag-orange">Medium</span></td>
+          <td><span class="tag tag-blue">Mentoring</span></td>
+        </tr>
+        <tr>
+          <td><div class="emp-cell"><div class="emp-avatar" style="background:#FEF6E4;color:#E6A817;">TP</div><div><div class="emp-name">Thilaga Pillai</div><div class="emp-role">Talent Consultant</div></div></div></td>
+          <td>Sales & Consulting</td>
+          <td><span class="tag tag-gray">Solid Core</span></td>
+          <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:72%;background:#E6A817"></div></div><span class="score-num">72</span></div></td>
+          <td><span class="tag tag-red">High</span></td>
+          <td><span class="tag tag-red">At Risk</span></td>
+        </tr>
+        <tr>
+          <td><div class="emp-cell"><div class="emp-avatar" style="background:#EAF7F2;color:#2DB27D;">RH</div><div><div class="emp-name">Razif Hazwan bin Zakaria</div><div class="emp-role">Marketing Lead</div></div></div></td>
+          <td>Marketing</td>
+          <td><span class="tag tag-orange">★ HiPo</span></td>
+          <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:88%;background:var(--success)"></div></div><span class="score-num">88</span></div></td>
+          <td><span class="tag tag-green">Low</span></td>
+          <td><span class="tag tag-green">On Track</span></td>
+        </tr>
+        <tr>
+          <td><div class="emp-cell"><div class="emp-avatar" style="background:#F5E8FF;color:#A855F7;">JW</div><div><div class="emp-name">Jennifer Wong Mei Ling</div><div class="emp-role">Operations Manager</div></div></div></td>
+          <td>Operations</td>
+          <td><span class="tag tag-gray">Solid Core</span></td>
+          <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:67%;background:#E6A817"></div></div><span class="score-num">67</span></div></td>
+          <td><span class="tag tag-orange">Medium</span></td>
+          <td><span class="tag tag-blue">Development Plan</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TALENT POOL PAGE -->
+<div class="page" id="page-talent">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Talent Pool</h1>
+        <p>247 employees · 38 HiPo · 4 Critical Gaps</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" style="font-size:12px;">Filter</button>
+        <button class="btn btn-ghost" style="font-size:12px;">Sort</button>
+        <button class="btn btn-primary" onclick="navigate('profile')">View Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-danger">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span><strong>3 employees flagged as high flight risk</strong> — Recommend immediate retention conversation with Thilaga Pillai, Ahmad Farouk, and Nurul Ain.</span>
+  </div>
+  <div class="alert alert-warning">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span><strong>AI Insight:</strong> Data Science team shows 34% skill gap in LLM/GenAI capabilities vs. 2025 roadmap requirements.</span>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <h3>All Employees</h3>
+      <div style="display:flex;gap:8px;">
+        <span class="tag tag-orange" style="cursor:pointer;">★ HiPo Only</span>
+        <span class="tag tag-red" style="cursor:pointer;">High Risk</span>
+        <span class="tag tag-gray" style="cursor:pointer;">All Departments</span>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th><th>Department</th><th>Tenure</th><th>Potential</th><th>Perf Score</th><th>Role Fit</th><th>Flight Risk</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="talent-table-body">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ORG DESIGN PAGE -->
+<div class="page" id="page-org">
+  <!-- Custom topbar row for Org -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+    <div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:8px;">
+        <span style="width:6px;height:6px;background:var(--success);border-radius:50%;display:inline-block;"></span>
+        ORG DESIGN STUDIO
+      </div>
+      <h1 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text-1);">Org Design Studio</h1>
+      <p style="font-size:13px;color:var(--text-2);margin-top:3px;">Drag employees onto the chart to model your structure &middot; Drop to replace</p>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-ghost" id="org-export-btn">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary" id="org-optimize-btn">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Optimize Org
+      </button>
+    </div>
+  </div>
+
+  <!-- ROW 1: bench (left) + chart (right, wide) -->
+  <div style="display:grid;grid-template-columns:240px 1fr;gap:16px;margin-bottom:16px;">
+
+    <!-- LEFT: Employee Bench -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;max-height:520px;">
+      <div style="font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:2px;">Employee Bench</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:10px;">Drag onto the chart</div>
+      <div style="position:relative;margin-bottom:10px;">
+        <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-3);" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="bench-search" type="text" placeholder="Search..." oninput="filterBench(this.value)"
+          style="width:100%;height:34px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:0 10px 0 30px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-1);outline:none;">
+      </div>
+      <div id="bench-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <!-- RIGHT: Org Chart Canvas — full width, tall -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:520px;">
+      <!-- Legend + controls -->
+      <div style="display:flex;align-items:center;gap:20px;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);">
+          <span style="width:9px;height:9px;background:var(--success);border-radius:50%;display:inline-block;"></span>Strong (80+)
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);">
+          <span style="width:9px;height:9px;background:var(--warning);border-radius:50%;display:inline-block;"></span>OK (60–79)
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);">
+          <span style="width:9px;height:9px;background:var(--danger);border-radius:50%;display:inline-block;"></span>Risk (&lt;60)
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px;" onclick="resetOrg()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1L1 10"/></svg>
+            Reset
+          </button>
+          <button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="autoFill()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Auto-Fill
+          </button>
+        </div>
+      </div>
+      <!-- Chart — scrollable horizontally, generous padding -->
+      <div style="flex:1;overflow:auto;padding:32px 40px;" id="org-chart-scroll">
+        <div id="org-chart" style="min-width:900px;display:flex;flex-direction:column;align-items:center;gap:0;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: AI Org Insights — full width below chart -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;">
+    <!-- Header + tabs inline -->
+    <div style="display:flex;align-items:center;gap:24px;margin-bottom:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:15px;font-weight:600;color:var(--text-1);">AI Org Insights</span>
+        <span style="width:7px;height:7px;background:var(--success);border-radius:50%;display:inline-block;animation:pulse 2s infinite;"></span>
+        <span style="font-size:12px;color:var(--text-3);">Updates on each drop</span>
+      </div>
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-left:auto;">
+        <button class="org-ins-tab active" data-tab="structure" onclick="orgInsTab(this,'structure')" style="padding:7px 20px;font-size:12px;font-weight:500;background:none;border:none;border-bottom:2px solid var(--primary);color:var(--primary);cursor:pointer;font-family:'DM Sans',sans-serif;">Structure</button>
+        <button class="org-ins-tab" data-tab="chemistry" onclick="orgInsTab(this,'chemistry')" style="padding:7px 20px;font-size:12px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-3);cursor:pointer;font-family:'DM Sans',sans-serif;">Chemistry</button>
+        <button class="org-ins-tab" data-tab="coverage" onclick="orgInsTab(this,'coverage')" style="padding:7px 20px;font-size:12px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-3);cursor:pointer;font-family:'DM Sans',sans-serif;">Coverage</button>
+      </div>
+    </div>
+    <div id="org-ins-content"></div>
+  </div>
+
+</div>
+
+<!-- SUCCESSION PLANNING PAGE -->
+<div class="page" id="page-succession">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Succession Planning</h1>
+        <p>AI-ranked successors for critical roles across the organization</p>
+      </div>
+      <button class="btn btn-primary">Run Assessment</button>
+    </div>
+  </div>
+  <div class="alert alert-danger">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span><strong>4 critical roles have no ready successor.</strong> Immediate action required for VP of Technology, Head of Data Science, Regional Sales Director, and CFO.</span>
+  </div>
+  <div class="succession-grid" id="succession-container"></div>
+</div>
+
+<!-- AI INSIGHTS PAGE -->
+<div class="page" id="page-insights">
+  <div class="page-header">
+    <h1>AI Insights</h1>
+    <p>Predictive intelligence powered by Luminous AI Engine v2.4</p>
+  </div>
+
+  <div class="three-col" style="margin-bottom:20px;">
+    <div class="chart-card">
+      <h3>Attrition Prediction</h3>
+      <p>Next 6-month risk forecast</p>
+      <div class="chart-wrap"><canvas id="attritionChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Skill Supply vs Demand</h3>
+      <p>Critical capabilities gap</p>
+      <div class="chart-wrap"><canvas id="supplyChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Team Performance Index</h3>
+      <p>Department benchmarking</p>
+      <div class="chart-wrap"><canvas id="teamPerfChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="chart-card">
+      <h3>Flight Risk Radar — Next 90 Days</h3>
+      <p>AI confidence: 87% — based on engagement, tenure, market data</p>
+      <div style="margin-top:8px;">
+        <div class="alert alert-danger" style="margin-bottom:8px;">
+          <div style="flex:1"><strong>Thilaga Pillai</strong> · Talent Consultant · Risk: 91% — 3 missed 1:1s, below-band comp, competitor activity detected</div>
+        </div>
+        <div class="alert alert-danger" style="margin-bottom:8px;">
+          <div style="flex:1"><strong>Ahmad Farouk bin Hassan</strong> · Data Scientist · Risk: 84% — Stagnant role, LinkedIn activity ↑180%</div>
+        </div>
+        <div class="alert alert-warning" style="margin-bottom:8px;">
+          <div style="flex:1"><strong>Nurul Ain binti Ismail</strong> · UI/UX Designer · Risk: 67% — No promotion in 3 yrs, low engagement score</div>
+        </div>
+        <div class="alert alert-warning">
+          <div style="flex:1"><strong>Marcus Lee Chee Keong</strong> · DevOps Engineer · Risk: 61% — Counter-offer rumored, salary review pending</div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>AI Recommendations Queue</h3>
+      <p>12 actions pending review this week</p>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--bg);border-radius:10px;padding:12px;font-size:12px;">
+          <div style="font-weight:600;color:var(--text-1);margin-bottom:4px;">🎯 Promote Siti Rahmah to Lead Analyst</div>
+          <div style="color:var(--text-2);line-height:1.6;">91% role fit score, exceeded targets for 5 consecutive quarters. Peer benchmark suggests 15% comp adjustment.</div>
+          <div style="display:flex;gap:6px;margin-top:8px;"><span class="tag tag-green" style="cursor:pointer;">Approve</span><span class="tag tag-gray" style="cursor:pointer;">Review</span></div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;font-size:12px;">
+          <div style="font-weight:600;color:var(--text-1);margin-bottom:4px;">🔄 Reskill 8 consultants in AI Facilitation</div>
+          <div style="color:var(--text-2);line-height:1.6;">Product roadmap requires GenAI competency by Q3. Recommend 6-week accelerator program.</div>
+          <div style="display:flex;gap:6px;margin-top:8px;"><span class="tag tag-green" style="cursor:pointer;">Approve</span><span class="tag tag-gray" style="cursor:pointer;">Review</span></div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;font-size:12px;">
+          <div style="font-weight:600;color:var(--text-1);margin-bottom:4px;">📞 Retention talk: Thilaga Pillai</div>
+          <div style="color:var(--text-2);line-height:1.6;">Flight risk at 91%. Suggest immediate 1:1 with HOD + compensation review + career pathing session.</div>
+          <div style="display:flex;gap:6px;margin-top:8px;"><span class="tag tag-red" style="cursor:pointer;">Urgent</span><span class="tag tag-gray" style="cursor:pointer;">Assign</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMPLOYEE PROFILE PAGE -->
+<div class="page" id="page-profile">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Employee Profile</h1>
+        <p>AI-powered talent intelligence view</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="navigate('talent')">← Back</button>
+        <button class="btn btn-primary">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+  <div class="profile-hero">
+    <div class="profile-top">
+      <div class="profile-avatar" style="background:linear-gradient(135deg,#7367AE,#9B93C8);">SR</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <h2>Siti Rahmah binti Ahmad</h2>
+            <p>Senior Data Analyst · Product & Analytics · Kuala Lumpur</p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--primary);">91</div>
+            <div style="font-size:11px;color:var(--text-3);">AI Role Fit Score</div>
+          </div>
+        </div>
+        <div class="profile-tags">
+          <span class="tag tag-orange">★ High Potential</span>
+          <span class="tag tag-green">Promotion Ready</span>
+          <span class="tag tag-purple">DMIT: Logical-Mathematical</span>
+          <span class="tag tag-blue">Low Flight Risk</span>
+          <span class="tag tag-gray">5 Years Tenure</span>
+        </div>
+      </div>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat"><div class="profile-stat-val">4.8</div><div class="profile-stat-lbl">Perf Rating (5.0)</div></div>
+      <div class="profile-stat"><div class="profile-stat-val">5</div><div class="profile-stat-lbl">Years at Luminous</div></div>
+      <div class="profile-stat"><div class="profile-stat-val">12</div><div class="profile-stat-lbl">Certifications</div></div>
+      <div class="profile-stat"><div class="profile-stat-val">3</div><div class="profile-stat-lbl">Mentees</div></div>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <div class="chart-card">
+      <h3>Competency Radar</h3>
+      <p>Based on manager assessment + AI analysis</p>
+      <div class="skill-radar-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Performance History</h3>
+      <p>Quarterly rating trend (2022–2025)</p>
+      <div class="skill-radar-wrap"><canvas id="perfHistChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>DMIT Intelligence Profile</h3>
+      <p>Dermatoglyphics Multiple Intelligence fingerprint analysis</p>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;color:var(--text-2);">Logical-Math</div>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div style="width:94%;height:100%;background:var(--primary);border-radius:4px;"></div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);min-width:30px;">94%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;color:var(--text-2);">Linguistic</div>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div style="width:76%;height:100%;background:var(--primary-mid);border-radius:4px;"></div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);min-width:30px;">76%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;color:var(--text-2);">Interpersonal</div>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div style="width:71%;height:100%;background:var(--primary-mid);border-radius:4px;"></div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);min-width:30px;">71%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;color:var(--text-2);">Spatial</div>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div style="width:83%;height:100%;background:var(--primary-mid);border-radius:4px;"></div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);min-width:30px;">83%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;color:var(--text-2);">Intrapersonal</div>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div style="width:88%;height:100%;background:var(--success);border-radius:4px;"></div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);min-width:30px;">88%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:120px;font-size:12px;color:var(--text-2);">Kinesthetic</div>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div style="width:42%;height:100%;background:#B4AEE2;border-radius:4px;"></div></div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);min-width:30px;">42%</div>
+        </div>
+        <div style="margin-top:6px;padding:10px;background:var(--primary-light);border-radius:8px;font-size:12px;color:var(--primary);">
+          <strong>AI Recommendation:</strong> Best suited for Senior Analyst, Data Lead, or AI Strategy roles. Strong systematic thinking with high self-awareness.
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Career Trajectory Simulation</h3>
+      <p>AI-projected 3-year development path</p>
+      <div style="margin-top:12px;">
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:10px;height:10px;background:var(--success);border-radius:50%;margin-top:4px;"></div><div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div></div>
+            <div style="flex:1;padding-bottom:16px;"><div style="font-size:13px;font-weight:600;color:var(--text-1);">Now · Senior Data Analyst</div><div style="font-size:12px;color:var(--text-2);margin-top:2px;">Role Fit: 91% · Fully proficient</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:10px;height:10px;background:var(--warning);border-radius:50%;margin-top:4px;"></div><div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div></div>
+            <div style="flex:1;padding-bottom:16px;"><div style="font-size:13px;font-weight:600;color:var(--text-1);">Q4 2025 · Lead Analyst (Recommended)</div><div style="font-size:12px;color:var(--text-2);margin-top:2px;">Gap: GenAI tools certification · 2 month bridge</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:10px;height:10px;background:var(--primary);border-radius:50%;margin-top:4px;"></div><div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div></div>
+            <div style="flex:1;padding-bottom:16px;"><div style="font-size:13px;font-weight:600;color:var(--text-1);">Q2 2026 · Head of Analytics</div><div style="font-size:12px;color:var(--text-2);margin-top:2px;">Gap: People management track · 12 month plan</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:10px;height:10px;background:var(--primary-mid);border-radius:50%;margin-top:4px;"></div></div>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text-1);">2027 · VP Product Intelligence</div><div style="font-size:12px;color:var(--text-2);margin-top:2px;">Aspirational — 78% confidence AI projection</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEVELOPMENT PROGRAMS PAGE -->
+<div class="page" id="page-development">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Development Programs</h1>
+        <p>6 active programs · 89 enrolled employees · AI-matched</p>
+      </div>
+      <button class="btn btn-primary">Create Program</button>
+    </div>
+  </div>
+  <div class="dev-cards" id="dev-programs-container"></div>
+</div>
+
+
+<!-- ROLE FIT AI PAGE -->
+<div class="page" id="page-rolefit">
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>Role Fit AI</h1>
+        <p>AI-powered career fit analysis for high-potential employees &middot; Luminous AI Engine v2.4</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost">Export Analysis</button>
+        <button class="btn btn-primary" onclick="alert('Running full HiPo analysis...')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Run Full Analysis
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="kpi-grid" style="margin-bottom:28px;">
+    <div class="kpi-card purple">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      <div class="kpi-value">38</div><div class="kpi-label">HiPo Employees Analysed</div>
+      <div class="kpi-delta up">&#8593; 5 this quarter</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="kpi-value">84</div><div class="kpi-label">Avg AI Fit Score</div>
+      <div class="kpi-delta up">&#8593; 4pts from last run</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div class="kpi-value">6</div><div class="kpi-label">Open Roles to Fill</div>
+      <div class="kpi-delta warn">4 critical</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="kpi-value">14</div><div class="kpi-label">Promotions Recommended</div>
+      <div class="kpi-delta up">&#8593; 3 new this month</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+      <div class="kpi-value">3</div><div class="kpi-label">High Risk HiPos</div>
+      <div class="kpi-delta down">Requires immediate action</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;" id="rf-cards"></div>
+  <div class="table-card">
+    <div class="table-header">
+      <h3>All HiPo Employees &mdash; Role Fit Analysis</h3>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" style="font-size:12px;">Filter by Dept</button>
+        <button class="btn btn-ghost" style="font-size:12px;">Export CSV</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Employee</th><th>Department</th><th>Current Role</th>
+        <th>Top Match</th><th>Fit Score</th><th>Leadership Pot.</th><th>Flight Risk</th><th></th>
+      </tr></thead>
+      <tbody id="rf-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- REPORTS PAGE -->
+<div class="page" id="page-reports">
+  <div class="page-header">
+    <h1>Luminous Tests</h1>
+    <p>AI-powered talent assessments · DMIT profiles · On-demand reports</p>
+  </div>
+  <div class="report-grid" id="reports-container"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <h1>Settings</h1>
+    <p>Platform configuration and integrations</p>
+  </div>
+  <div class="two-col">
+    <div class="chart-card">
+      <h3 style="margin-bottom:14px;">Integrations</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:10px;">
+          <div style="font-size:13px;font-weight:500;color:var(--text-1);">HRMS (SAP SuccessFactors)</div>
+          <span class="tag tag-green">Connected</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:10px;">
+          <div style="font-size:13px;font-weight:500;color:var(--text-1);">DMIT Assessment Engine</div>
+          <span class="tag tag-green">Connected</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:10px;">
+          <div style="font-size:13px;font-weight:500;color:var(--text-1);">LinkedIn Talent Insights</div>
+          <span class="tag tag-orange">Partial</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:10px;">
+          <div style="font-size:13px;font-weight:500;color:var(--text-1);">Payroll System (ADP)</div>
+          <span class="tag tag-gray">Not Connected</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3 style="margin-bottom:14px;">AI Model Settings</h3>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8;">
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span>Role Fit Engine</span><span class="tag tag-purple">v2.4 Active</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span>Flight Risk Model</span><span class="tag tag-green">87% Accuracy</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span>Succession AI</span><span class="tag tag-blue">Beta</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;">
+          <span>DMIT Integration</span><span class="tag tag-green">Enabled</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<!-- RIGHT AI PANEL -->
+<div class="right-panel">
+  <div class="panel-header">
+    <h3>AI Role Fit Engine</h3>
+    <p>Powered by Luminous AI v2.4</p>
+    <div class="ai-badge">Live Analysis</div>
+  </div>
+
+  <div class="role-fit-score">
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="42" fill="none" stroke="#EAE8F7" stroke-width="8"/>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="#7367AE" stroke-width="8"
+          stroke-dasharray="263.89" stroke-dashoffset="23.75" stroke-linecap="round"
+          transform="rotate(-90 50 50)"/>
+      </svg>
+      <div class="score-ring-val">91</div>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--text-1);">Siti Rahmah</div>
+    <div style="font-size:11px;color:var(--text-3);margin-top:2px;">Senior Data Analyst → Lead Analyst</div>
+    <span class="tag tag-green" style="margin-top:8px;display:inline-flex;">Strongly Recommended</span>
+  </div>
+
+  <div class="section-divider">Top Candidates for Open Roles</div>
+  <div class="candidate-list">
+    <div class="candidate-row" onclick="navigate('profile')">
+      <div class="emp-avatar" style="background:#EAE8F7;color:#7367AE;width:30px;height:30px;font-size:11px;flex-shrink:0;">SR</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Siti Rahmah Ahmad</div>
+        <div class="candidate-role">Lead Analyst</div>
+      </div>
+      <span class="fit-pill" style="background:var(--success-bg);color:var(--success);">91%</span>
+    </div>
+    <div class="candidate-row">
+      <div class="emp-avatar" style="background:#EBF2FF;color:#3B82F6;width:30px;height:30px;font-size:11px;flex-shrink:0;">KL</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Khoo Lik Seng</div>
+        <div class="candidate-role">Engineering Mgr</div>
+      </div>
+      <span class="fit-pill" style="background:var(--success-bg);color:var(--success);">85%</span>
+    </div>
+    <div class="candidate-row">
+      <div class="emp-avatar" style="background:#EAF7F2;color:#2DB27D;width:30px;height:30px;font-size:11px;flex-shrink:0;">RH</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Razif Hazwan</div>
+        <div class="candidate-role">Marketing Lead</div>
+      </div>
+      <span class="fit-pill" style="background:var(--success-bg);color:var(--success);">83%</span>
+    </div>
+    <div class="candidate-row">
+      <div class="emp-avatar" style="background:#FEF6E4;color:#E6A817;width:30px;height:30px;font-size:11px;flex-shrink:0;">AN</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Amirah Nabilah</div>
+        <div class="candidate-role">Product Mgr</div>
+      </div>
+      <span class="fit-pill" style="background:var(--warning-bg);color:var(--warning);">74%</span>
+    </div>
+    <div class="candidate-row">
+      <div class="emp-avatar" style="background:#FEF0F0;color:#E05252;width:30px;height:30px;font-size:11px;flex-shrink:0;">FZ</div>
+      <div class="candidate-info">
+        <div class="candidate-name">Faizal Zainudin</div>
+        <div class="candidate-role">Ops Manager</div>
+      </div>
+      <span class="fit-pill" style="background:var(--warning-bg);color:var(--warning);">68%</span>
+    </div>
+  </div>
+
+  <div class="section-divider">AI Insights</div>
+  <div class="ai-insight-card">
+    <h4>
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Retention Alert
+    </h4>
+    <p>Thilaga Pillai shows 91% flight risk. Compensation is 18% below market. Recommend immediate review.</p>
+  </div>
+  <div class="ai-insight-card">
+    <h4>
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Skill Gap Detected
+    </h4>
+    <p>GenAI capabilities gap widening in Product team. 8 employees need upskilling by Q3 2025 to meet roadmap.</p>
+  </div>
+  <div class="ai-insight-card">
+    <h4>
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Succession Gap
+    </h4>
+    <p>VP of Technology role has no ready successor. Khoo Lik Seng is closest at 68% readiness — needs 9-month stretch assignment.</p>
+  </div>
+
+  <div style="padding:16px;">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;">Generate Full Report</button>
+  </div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end layout -->
+
+<script>
+// ========== NAVIGATION ==========
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + page + "'")) {
+      n.classList.add('active');
+    }
+  });
+  if (page === 'dashboard') initDashboardCharts();
+  if (page === 'insights') initInsightCharts();
+  if (page === 'profile') initProfileCharts();
+}
+
+// ========== FAKE DATA ==========
+const employees = [
+  {id:'SR',name:'Siti Rahmah binti Ahmad',role:'Senior Data Analyst',dept:'Analytics',tenure:'5 yrs',potential:'HiPo',perf:4.8,fit:91,risk:'Low',color:'#EAE8F7',tc:'#7367AE'},
+  {id:'KL',name:'Khoo Lik Seng',role:'Engineering Manager',dept:'Technology',tenure:'3 yrs',potential:'HiPo',perf:4.5,fit:85,risk:'Medium',color:'#EBF2FF',tc:'#3B82F6'},
+  {id:'RH',name:'Razif Hazwan bin Zakaria',role:'Marketing Lead',dept:'Marketing',tenure:'4 yrs',potential:'HiPo',perf:4.7,fit:88,risk:'Low',color:'#EAF7F2',tc:'#2DB27D'},
+  {id:'TP',name:'Thilaga Pillai',role:'Talent Consultant',dept:'Sales',tenure:'2 yrs',potential:'Solid',perf:3.9,fit:72,risk:'High',color:'#FEF6E4',tc:'#E6A817'},
+  {id:'JW',name:'Jennifer Wong Mei Ling',role:'Operations Manager',dept:'Operations',tenure:'6 yrs',potential:'Solid',perf:3.7,fit:67,risk:'Medium',color:'#F5E8FF',tc:'#A855F7'},
+  {id:'AF',name:'Ahmad Farouk bin Hassan',role:'Data Scientist',dept:'Analytics',tenure:'1.5 yrs',potential:'HiPo',perf:4.3,fit:80,risk:'High',color:'#FEF0F0',tc:'#E05252'},
+  {id:'NI',name:'Nurul Ain binti Ismail',role:'UI/UX Designer',dept:'Technology',tenure:'3 yrs',potential:'Solid',perf:4.1,fit:76,risk:'Medium',color:'#F5E8FF',tc:'#A855F7'},
+  {id:'AN',name:'Amirah Nabilah binti Rauf',role:'Product Manager',dept:'Product',tenure:'2 yrs',potential:'HiPo',perf:4.4,fit:82,risk:'Low',color:'#EBF2FF',tc:'#3B82F6'},
+];
+
+// Populate talent table
+const tbody = document.getElementById('talent-table-body');
+employees.forEach(e => {
+  const riskColor = e.risk === 'High' ? 'tag-red' : e.risk === 'Medium' ? 'tag-orange' : 'tag-green';
+  const potColor = e.potential === 'HiPo' ? 'tag-orange' : 'tag-gray';
+  const fitColor = e.fit >= 80 ? 'var(--success)' : e.fit >= 65 ? '#E6A817' : 'var(--danger)';
+  tbody.innerHTML += `<tr onclick="navigate('profile')" style="cursor:pointer;">
+    <td><div class="emp-cell"><div class="emp-avatar" style="background:${e.color};color:${e.tc};">${e.id}</div><div><div class="emp-name">${e.name}</div><div class="emp-role">${e.role}</div></div></div></td>
+    <td>${e.dept}</td>
+    <td>${e.tenure}</td>
+    <td><span class="tag ${potColor}">${e.potential === 'HiPo' ? '★ HiPo' : 'Solid Core'}</span></td>
+    <td>${e.perf}</td>
+    <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${e.fit}%;background:${fitColor}"></div></div><span class="score-num">${e.fit}</span></div></td>
+    <td><span class="tag ${riskColor}">${e.risk}</span></td>
+    <td><span class="tag tag-purple" style="cursor:pointer;">View</span></td>
+  </tr>`;
+});
+
+// ========== ORG DESIGN STUDIO ==========
+(function() {
+
+const BENCH_DATA = [
+  {av:'SR',name:'Siti Rahmah',  dept:'Analytics',  score:91, bg:'#EAE8F7',tc:'#7367AE'},
+  {av:'PC',name:'Dr. Priya',    dept:'Analytics',  score:94, bg:'#EAE8F7',tc:'#5A519A'},
+  {av:'KL',name:'Khoo Lik',     dept:'Engineering',score:85, bg:'#EBF2FF',tc:'#3B82F6'},
+  {av:'RH',name:'Razif Hazwan', dept:'Marketing',  score:88, bg:'#EAF7F2',tc:'#2DB27D'},
+  {av:'AF',name:'Ahmad Farouk', dept:'Engineering',score:89, bg:'#FEF6E4',tc:'#E6A817'},
+  {av:'JW',name:'Jennifer Wong',dept:'Operations', score:81, bg:'#F5E8FF',tc:'#A855F7'},
+  {av:'NI',name:'Nurul Ain',    dept:'Engineering',score:76, bg:'#EBF2FF',tc:'#3B82F6'},
+  {av:'AN',name:'Amirah Nabilah',dept:'Analytics', score:83, bg:'#EAE8F7',tc:'#7367AE'},
+  {av:'ML',name:'Marcus Lee',   dept:'Sales',      score:68, bg:'#FEF0F0',tc:'#E05252'},
+  {av:'TP',name:'Thilaga Pillai',dept:'Sales',     score:72, bg:'#FEF6E4',tc:'#E6A817'},
+];
+
+const DEPT_COLORS = {
+  'Exe':  {bg:'#EAE8F7',tc:'#7367AE'},
+  'Sal':  {bg:'#FEF6E4',tc:'#E6A817'},
+  'Mar':  {bg:'#EAF7F2',tc:'#2DB27D'},
+  'Eng':  {bg:'#EBF2FF',tc:'#3B82F6'},
+  'Ops':  {bg:'#F5E8FF',tc:'#A855F7'},
+  'Ana':  {bg:'#EAE8F7',tc:'#7367AE'},
+};
+
+// Chart structure: nodes keyed by id
+const CHART_NODES = {
+  ceo:   {title:'CEO',              dept:'Exe', level:0},
+  sales: {title:'Head of Sales',    dept:'Sal', level:1},
+  mktg:  {title:'Head of Marketing',dept:'Mar', level:1},
+  eng:   {title:'Head of Engineering',dept:'Eng',level:1},
+  salesmgr:{title:'Sales Manager',  dept:'Sal', level:2},
+  salesexec:{title:'Sales Executive',dept:'Sal',level:2},
+  mktgexec:{title:'Marketing Exec', dept:'Mar', level:2},
+  engmgr:  {title:'Engineering Mgr',dept:'Eng', level:2},
+  datasci: {title:'Data Scientist', dept:'Eng', level:2},
+};
+
+// Which employee is in each slot
+let placements = {};
+
+function scoreColor(s) {
+  return s >= 80 ? 'var(--success)' : s >= 60 ? 'var(--warning)' : 'var(--danger)';
+}
+
+function renderBench(filter='') {
+  const el = document.getElementById('bench-list');
+  if (!el) return;
+  const placed = new Set(Object.values(placements));
+  const filtered = BENCH_DATA.filter(e =>
+    !placed.has(e.av) &&
+    (filter === '' || e.name.toLowerCase().includes(filter.toLowerCase()) || e.dept.toLowerCase().includes(filter.toLowerCase()))
+  );
+  el.innerHTML = filtered.map(e => `
+    <div class="bench-card" draggable="true" data-av="${e.av}"
+      ondragstart="onBenchDrag(event,'${e.av}')">
+      <div class="bench-av" style="background:${e.bg};color:${e.tc};">${e.av}</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-1);">${e.name}</div>
+        <div style="font-size:11px;color:var(--text-3);">${e.dept}</div>
+      </div>
+      <span class="bench-score" style="color:${scoreColor(e.score)};">${e.score}</span>
+    </div>`).join('');
+}
+
+function renderChart() {
+  const chart = document.getElementById('org-chart');
+  if (!chart) return;
+
+  function node(id) {
+    const n = CHART_NODES[id];
+    const dc = DEPT_COLORS[n.dept] || {bg:'#F0F0F0',tc:'#666'};
+    const emp = placements[id] ? BENCH_DATA.find(e=>e.av===placements[id]) : null;
+    const isFilled = !!emp;
+    return `<div class="org-drop-zone ${isFilled?'filled':''}" id="dz-${id}"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="onDrop(event,'${id}')"
+        onclick="${isFilled?`removeFromSlot('${id}')`:''}">
+      <div class="org-dept-pill" style="background:${dc.bg};color:${dc.tc};">${n.dept}</div>
+      ${isFilled ? `
+        <div style="width:44px;height:44px;border-radius:50%;background:${emp.bg};color:${emp.tc};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin-bottom:5px;">${emp.av}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-1);">${emp.name}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:3px;">${n.title}</div>
+        <span style="font-size:13px;font-weight:700;color:${scoreColor(emp.score)};">${emp.score}</span>
+      ` : `
+        <div class="dz-plus">+</div>
+        <div class="dz-title">${n.title}</div>
+        <div class="dz-sub">Drop here</div>
+      `}
+    </div>`;
+  }
+
+  function vline() { return '<div class="org-vert-line"></div>'; }
+
+  chart.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);margin-bottom:6px;">Exe</div>
+      ${node('ceo')}
+      ${vline()}
+      <div style="display:flex;position:relative;gap:0;justify-content:center;">
+        <div style="position:absolute;top:0;left:16%;right:16%;height:2px;background:var(--border);"></div>
+        <div class="org-col">
+          ${vline()}
+          ${node('sales')}
+          ${vline()}
+          <div style="display:flex;gap:12px;">
+            <div class="org-col">${vline()}${node('salesmgr')}</div>
+            <div class="org-col">${vline()}${node('salesexec')}</div>
+          </div>
+        </div>
+        <div class="org-col">
+          ${vline()}
+          ${node('mktg')}
+          ${vline()}
+          <div style="display:flex;gap:12px;">
+            <div class="org-col">${vline()}${node('mktgexec')}</div>
+          </div>
+        </div>
+        <div class="org-col">
+          ${vline()}
+          ${node('eng')}
+          ${vline()}
+          <div style="display:flex;gap:12px;">
+            <div class="org-col">${vline()}${node('engmgr')}</div>
+            <div class="org-col">${vline()}${node('datasci')}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateInsights() {
+  const filled = Object.keys(placements).length;
+  const total = Object.keys(CHART_NODES).length;
+  const scores = Object.entries(placements).map(([slot, av]) => {
+    const emp = BENCH_DATA.find(e => e.av === av);
+    return emp ? emp.score : 0;
+  });
+  const avgScore = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+  const weak = scores.filter(s=>s<70).length;
+
+  // Insights now render as horizontal cards in full-width bottom panel
+  const wrap = (cards) => `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">${cards}</div>`;
+  const card = (content, style='') => `<div class="ins-block" style="${style}">${content}</div>`;
+
+  const insightsByTab = {
+    structure: filled === 0 ?
+      `<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px;">
+        Drag employees onto the chart above. AI insights appear here as you place them.
+      </div>` :
+      wrap(`
+        ${card(`<h4>📊 Fill Rate</h4>
+          <p style="font-size:18px;font-weight:700;color:var(--primary);margin:6px 0;">${filled}<span style="font-size:13px;font-weight:400;color:var(--text-3);"> / ${total} roles</span></p>
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="width:${Math.round(filled/total*100)}%;height:100%;background:var(--primary);border-radius:3px;"></div>
+          </div>
+          <p style="margin-top:6px;">${Math.round(filled/total*100)}% of structure filled</p>`)}
+        ${card(`<h4>${avgScore>=80?'✅':'⚠️'} Avg Talent Score</h4>
+          <p style="font-size:24px;font-weight:700;color:${scoreColor(avgScore)};margin:6px 0;">${avgScore}<span style="font-size:12px;font-weight:400;color:var(--text-3);">/100</span></p>
+          <p>${avgScore>=80?'Strong lineup overall.':'Some roles need stronger candidates.'}</p>`)}
+        ${weak>0 ? card(`<h4 style="color:var(--danger);">⚠️ Risk Alert</h4>
+          <p style="font-size:20px;font-weight:700;color:var(--danger);margin:4px 0;">${weak} role${weak>1?'s':''}</p>
+          <p>filled by employees scoring below 70. Consider swapping.</p>`,'background:var(--danger-bg);border:1px solid rgba(224,82,82,0.2);') : ''}
+        ${card(`<h4 style="color:var(--success);">💡 AI Suggestion</h4>
+          <p>Try <strong>Auto-Fill</strong> to let AI automatically place the best-fit employees into all empty slots.</p>`,'background:var(--success-bg);')}
+        ${Object.entries(placements).slice(0,3).map(([slot, av]) => {
+          const emp = BENCH_DATA.find(e=>e.av===av);
+          return emp ? card(`<h4>✓ ${CHART_NODES[slot].title}</h4>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+              <div style="width:30px;height:30px;border-radius:50%;background:${emp.bg};color:${emp.tc};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${emp.av}</div>
+              <span style="font-size:13px;font-weight:500;color:var(--text-1);">${emp.name}</span>
+              <span style="margin-left:auto;font-weight:700;color:${scoreColor(emp.score)};">${emp.score}</span>
+            </div>`) : '';
+        }).join('')}
+      `),
+
+    chemistry: filled < 2 ?
+      `<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px;">Fill at least 2 roles to see chemistry analysis.</div>` :
+      wrap(
+        card(`<h4>🤝 Overall Team Chemistry</h4>
+          <p style="font-size:22px;font-weight:700;color:var(--primary);margin:6px 0;">${Math.min(95,60+filled*5)}%</p>
+          <p>Based on DMIT compatibility of placed employees</p>`) +
+        Object.entries(placements).map(([slot, av]) => {
+          const emp = BENCH_DATA.find(e=>e.av===av);
+          const compat = 65 + Math.floor(((emp?emp.score:70) * 0.3));
+          return emp ? card(`
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:${emp.bg};color:${emp.tc};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${emp.av}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${emp.name}</div>
+                <div style="font-size:10px;color:var(--text-3);">${CHART_NODES[slot].title}</div>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:${scoreColor(compat)};flex-shrink:0;">${compat}%</span>
+            </div>
+            <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+              <div style="width:${compat}%;height:100%;background:${scoreColor(compat)};border-radius:2px;"></div>
+            </div>`) : '';
+        }).join('')
+      ),
+
+    coverage: wrap(
+      card(`<h4>🏢 Department Coverage</h4><p>Roles filled per department in this structure.</p>`) +
+      ['Sal','Mar','Eng','Ops','Ana'].map(dept => {
+        const deptNodes = Object.entries(CHART_NODES).filter(([,n])=>n.dept===dept);
+        const deptFilled = deptNodes.filter(([id])=>placements[id]).length;
+        const dc = DEPT_COLORS[dept]||{bg:'#eee',tc:'#666'};
+        const pct = deptNodes.length ? Math.round(deptFilled/deptNodes.length*100) : 0;
+        return card(`
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="background:${dc.bg};color:${dc.tc};padding:3px 9px;border-radius:8px;font-size:11px;font-weight:600;">${dept}</span>
+            <span style="font-size:14px;font-weight:700;color:var(--text-1);">${deptFilled}/${deptNodes.length} filled</span>
+            ${pct===100?'<span style="margin-left:auto;font-size:11px;color:var(--success);font-weight:600;">✓ Complete</span>':''}
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${pct===100?'var(--success)':'var(--primary)'};border-radius:3px;transition:width 0.4s;"></div>
+          </div>`);
+      }).join('')
+    ),
+  };
+
+  const activeTab = document.querySelector('.org-ins-tab.active');
+  const tab = activeTab ? activeTab.dataset.tab : 'structure';
+  const cont = document.getElementById('org-ins-content');
+  if (cont) cont.innerHTML = insightsByTab[tab] || insightsByTab.structure;
+}
+
+window.onBenchDrag = function(e, av) {
+  e.dataTransfer.setData('av', av);
+};
+
+window.onDrop = function(e, slotId) {
+  e.preventDefault();
+  const av = e.dataTransfer.getData('av');
+  if (!av) return;
+  // Remove from any existing slot
+  Object.keys(placements).forEach(k => { if (placements[k]===av) delete placements[k]; });
+  placements[slotId] = av;
+  renderChart();
+  renderBench();
+  updateInsights();
+  // Visual feedback
+  const dz = document.getElementById('dz-'+slotId);
+  if (dz) { dz.classList.remove('drag-over'); dz.style.transform='scale(1.04)'; setTimeout(()=>dz.style.transform='',300); }
+};
+
+window.removeFromSlot = function(slotId) {
+  if (placements[slotId]) {
+    delete placements[slotId];
+    renderChart();
+    renderBench();
+    updateInsights();
+  }
+};
+
+window.filterBench = function(val) { renderBench(val); };
+
+window.resetOrg = function() {
+  placements = {};
+  renderChart();
+  renderBench();
+  updateInsights();
+};
+
+window.autoFill = function() {
+  const empsLeft = [...BENCH_DATA].filter(e => !Object.values(placements).includes(e.av));
+  const slotsLeft = Object.keys(CHART_NODES).filter(id => !placements[id]);
+  // Sort employees by score desc, fill slots
+  empsLeft.sort((a,b)=>b.score-a.score);
+  slotsLeft.forEach((slot, i) => {
+    if (empsLeft[i]) placements[slot] = empsLeft[i].av;
+  });
+  renderChart();
+  renderBench();
+  updateInsights();
+};
+
+window.orgInsTab = function(btn, tab) {
+  document.querySelectorAll('.org-ins-tab').forEach(b => {
+    b.classList.remove('active');
+    b.style.borderBottomColor = 'transparent';
+    b.style.color = 'var(--text-3)';
+  });
+  btn.classList.add('active');
+  btn.style.borderBottomColor = 'var(--primary)';
+  btn.style.color = 'var(--primary)';
+  updateInsights();
+};
+
+// Init on page nav
+const origNavigate = window.navigate;
+window.navigate = function(page) {
+  origNavigate(page);
+  if (page === 'org') {
+    setTimeout(() => {
+      renderBench();
+      renderChart();
+      updateInsights();
+    }, 50);
+  }
+};
+
+// Also init if org is default active
+if (document.getElementById('page-org') && document.getElementById('page-org').classList.contains('active')) {
+  renderBench(); renderChart(); updateInsights();
+}
+
+})();
+
+
+// ========== SUCCESSION ==========
+const successionRoles = [
+  {role:'VP of Technology',incumbent:'Open (Vacancy)',critical:true,successors:[
+    {name:'Khoo Lik Seng',ready:68,timeline:'9-12 months',color:'#EBF2FF',tc:'#3B82F6',id:'KL'},
+    {name:'Ahmad Farouk Hassan',ready:45,timeline:'18-24 months',color:'#FEF0F0',tc:'#E05252',id:'AF'},
+  ]},
+  {role:'Head of Data Science',incumbent:'Dr. Priya Chandran (retiring)',critical:true,successors:[
+    {name:'Ahmad Farouk Hassan',ready:72,timeline:'6-9 months',color:'#FEF0F0',tc:'#E05252',id:'AF'},
+    {name:'Siti Rahmah Ahmad',ready:58,timeline:'12-18 months',color:'#EAE8F7',tc:'#7367AE',id:'SR'},
+  ]},
+  {role:'Marketing Director',incumbent:'Razif Hazwan',critical:false,successors:[
+    {name:'Amirah Nabilah Rauf',ready:81,timeline:'3-6 months',color:'#EBF2FF',tc:'#3B82F6',id:'AN'},
+    {name:'Nurul Ain Ismail',ready:54,timeline:'12 months',color:'#F5E8FF',tc:'#A855F7',id:'NI'},
+  ]},
+  {role:'Regional Sales Director',incumbent:'Vacant — Succession needed',critical:true,successors:[
+    {name:'Thilaga Pillai',ready:38,timeline:'24+ months',color:'#FEF6E4',tc:'#E6A817',id:'TP'},
+  ]},
+];
+
+const succCont = document.getElementById('succession-container');
+successionRoles.forEach(r => {
+  const readyColor = s => s.ready >= 75 ? 'var(--success)' : s.ready >= 55 ? '#E6A817' : 'var(--danger)';
+  const html = `<div class="succession-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <h3>${r.role}</h3>
+      ${r.critical ? '<span class="tag tag-red">Critical</span>' : '<span class="tag tag-blue">Planned</span>'}
+    </div>
+    <p>${r.incumbent}</p>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);margin-bottom:8px;">Successors</div>
+    ${r.successors.map(s => `<div class="successor-row">
+      <div class="emp-avatar" style="background:${s.color};color:${s.tc};width:28px;height:28px;font-size:10px;">${s.id}</div>
+      <div class="readiness-bar">
+        <div style="display:flex;justify-content:space-between;"><span class="readiness-label">${s.name}</span><span class="readiness-pct">${s.ready}%</span></div>
+        <div class="readiness-track"><div class="readiness-fill" style="width:${s.ready}%;background:${readyColor(s)};"></div></div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px;">Ready in: ${s.timeline}</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+  succCont.innerHTML += html;
+});
+
+// ========== DEVELOPMENT PROGRAMS ==========
+const programs = [
+  {icon:'🚀',color:'#EAE8F7',name:'AI & GenAI Accelerator',desc:'8-week program covering LLM fundamentals, prompt engineering, and AI facilitation for consultants.',enrolled:22,total:30,progress:45},
+  {icon:'👥',color:'#EAF7F2',name:'Leadership Launchpad',desc:'Structured HiPo development track with executive mentoring, stretch projects, and 360° feedback cycles.',enrolled:14,total:15,progress:72},
+  {icon:'📊',color:'#EBF2FF',name:'Data Literacy Bootcamp',desc:'Foundation-to-advanced analytics skills for non-technical staff. Tableau, SQL, and storytelling.',enrolled:31,total:40,progress:33},
+  {icon:'🎯',color:'#FEF6E4',name:'Sales Excellence Program',desc:'Consultative selling methodology, DMIT-based client profiling, and negotiation mastery.',enrolled:18,total:25,progress:60},
+  {icon:'💡',color:'#FEF0F0',name:'Innovation Sprint Lab',desc:'Cross-functional 12-week innovation program producing 3 validated product concepts per cohort.',enrolled:9,total:10,progress:88},
+  {icon:'🌱',color:'#EAF7F2',name:'New Manager Fundamentals',desc:'Transitioning from individual contributor to people leader. Coaching, OKRs, and team dynamics.',enrolled:7,total:10,progress:25},
+];
+const devCont = document.getElementById('dev-programs-container');
+programs.forEach(p => {
+  devCont.innerHTML += `<div class="dev-card">
+    <div class="dev-card-icon" style="background:${p.color};font-size:22px;">${p.icon}</div>
+    <h3>${p.name}</h3>
+    <p>${p.desc}</p>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">${p.enrolled} / ${p.total} enrolled</div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" style="width:${p.progress}%"></div></div>
+      <span class="progress-txt">${p.progress}%</span>
+    </div>
+  </div>`;
+});
+
+// ========== REPORTS ==========
+const reports = [
+  {icon:'👁',color:'#EAE8F7',name:'Talent Health Report',desc:'Quarterly snapshot of headcount, HiPo distribution, engagement, and flight risk across all departments.',meta:'Last run: 2 days ago · Scheduled weekly'},
+  {icon:'📈',color:'#EAF7F2',name:'HiPo Identification Report',desc:'AI-generated list of high potential employees based on performance, potential matrix, and DMIT profile.',meta:'Last run: 5 days ago · On-demand'},
+  {icon:'⚠️',color:'#FEF0F0',name:'Succession Risk Analysis',desc:'Critical role coverage gaps and successor readiness scores with AI recommendations for immediate action.',meta:'Last run: 1 week ago · Monthly'},
+  {icon:'💰',color:'#FEF6E4',name:'Compensation Benchmarking',desc:'Salary band comparison against industry data for Malaysia tech and consulting sector. Gap identification.',meta:'Last run: 3 weeks ago · Quarterly'},
+  {icon:'🎓',color:'#EBF2FF',name:'Learning & Development ROI',desc:'Program completion rates, skill gap closure tracking, and business impact correlation of L&D investments.',meta:'Last run: 1 month ago · Quarterly'},
+  {icon:'🔮',color:'#F5E8FF',name:'AI Predictive Attrition',desc:'6-month attrition forecast by department with individual employee risk scoring and recommended interventions.',meta:'Last run: Yesterday · Weekly'},
+];
+const repCont = document.getElementById('reports-container');
+reports.forEach(r => {
+  repCont.innerHTML += `<div class="report-card">
+    <div class="report-icon" style="background:${r.color};font-size:20px;">${r.icon}</div>
+    <h3>${r.name}</h3>
+    <p>${r.desc}</p>
+    <div class="report-meta">${r.meta}</div>
+    <button class="btn btn-ghost" style="font-size:12px;margin-top:8px;width:100%;justify-content:center;">Generate Report</button>
+  </div>`;
+});
+
+// ========== CHARTS ==========
+const PRIMARY = '#7367AE';
+const PRIMARY_LIGHT = '#EAE8F7';
+const GRID = '#E8E7F0';
+const TEXT2 = '#5B5878';
+const SUCCESS = '#2DB27D';
+const WARNING = '#E6A817';
+const DANGER = '#E05252';
+const INFO = '#3B82F6';
+
+const defaultOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: GRID, lineWidth: 0.5 }, ticks: { color: TEXT2, font: { size: 10 } } },
+    y: { grid: { color: GRID, lineWidth: 0.5 }, ticks: { color: TEXT2, font: { size: 10 } } }
+  }
+};
+
+let chartsInit = false;
+function initDashboardCharts() {
+  if (chartsInit) return;
+  chartsInit = true;
+
+  // Growth chart
+  new Chart(document.getElementById('growthChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets: [
+        { label: 'Headcount', data: [198,205,211,218,222,228,231,235,240,244,247,247], backgroundColor: PRIMARY_LIGHT, borderColor: PRIMARY, borderWidth: 1.5, borderRadius: 4, type: 'bar' },
+        { label: 'HiPo', data: [24,25,26,27,28,29,30,32,34,36,37,38], borderColor: WARNING, backgroundColor: 'transparent', borderWidth: 2, type: 'line', tension: 0.4, pointRadius: 3, pointBackgroundColor: WARNING }
+      ]
+    },
+    options: { ...defaultOpts, plugins: { legend: { display: true, labels: { color: TEXT2, font: { size: 11 }, boxWidth: 10, boxHeight: 10, padding: 16 } } } }
+  });
+
+  // Department donut
+  new Chart(document.getElementById('deptChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Technology','Analytics','Sales','Marketing','Operations','Finance'],
+      datasets: [{ data: [68,42,51,34,38,14], backgroundColor: [PRIMARY, '#9B93C8', WARNING, SUCCESS, INFO, DANGER], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { color: TEXT2, font: { size: 10 }, boxWidth: 8, boxHeight: 8, padding: 8 } } }, cutout: '65%' }
+  });
+
+  // Skill gap
+  new Chart(document.getElementById('skillGapChart'), {
+    type: 'bar',
+    data: {
+      labels: ['GenAI','Leadership','Data Sci','Cloud','Sales','UX'],
+      datasets: [
+        { label: 'Current', data: [42, 65, 71, 58, 74, 68], backgroundColor: PRIMARY_LIGHT, borderColor: PRIMARY, borderWidth: 1.5, borderRadius: 3 },
+        { label: 'Required', data: [85, 80, 90, 80, 85, 80], backgroundColor: 'transparent', borderColor: DANGER, borderWidth: 1.5, borderDash: [4,2], borderRadius: 3 }
+      ]
+    },
+    options: { ...defaultOpts, plugins: { legend: { display: true, labels: { color: TEXT2, font: { size: 10 }, boxWidth: 8, boxHeight: 8, padding: 12 } } } }
+  });
+
+  // Risk donut
+  new Chart(document.getElementById('riskChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Low Risk','Medium Risk','High Risk'],
+      datasets: [{ data: [168, 56, 23], backgroundColor: [SUCCESS, WARNING, DANGER], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { color: TEXT2, font: { size: 10 }, boxWidth: 8, boxHeight: 8, padding: 8 } } }, cutout: '60%' }
+  });
+
+  // Engagement trend
+  new Chart(document.getElementById('engageChart'), {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [{ data: [68, 70, 71, 73, 72, 74], borderColor: INFO, backgroundColor: 'rgba(59,130,246,0.08)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: INFO }]
+    },
+    options: { ...defaultOpts }
+  });
+}
+
+let insightsInit = false;
+function initInsightCharts() {
+  if (insightsInit) return;
+  insightsInit = true;
+
+  new Chart(document.getElementById('attritionChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [
+        { label: 'Actual', data: [3,2,4,2,1,null], backgroundColor: DANGER, borderRadius: 4 },
+        { label: 'Forecast', data: [null,null,null,null,2,4], backgroundColor: 'rgba(224,82,82,0.3)', borderRadius: 4, borderDash: [4,2] }
+      ]
+    },
+    options: { ...defaultOpts, plugins: { legend: { display: true, labels: { color: TEXT2, font: { size: 10 }, boxWidth: 8, boxHeight: 8, padding: 12 } } } }
+  });
+
+  new Chart(document.getElementById('supplyChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Data Sci','AI/ML','Cloud','Leadership','Sales','Design'],
+      datasets: [
+        { label: 'Supply', data: [70,42,58,65,74,68], borderColor: PRIMARY, backgroundColor: 'rgba(115,103,174,0.12)', borderWidth: 2, pointBackgroundColor: PRIMARY },
+        { label: 'Demand', data: [90,85,80,80,85,75], borderColor: DANGER, backgroundColor: 'rgba(224,82,82,0.06)', borderWidth: 2, pointBackgroundColor: DANGER, borderDash: [4,2] }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: TEXT2, font: { size: 10 }, boxWidth: 8, boxHeight: 8, padding: 12 } } }, scales: { r: { grid: { color: GRID }, ticks: { display: false } } } }
+  });
+
+  new Chart(document.getElementById('teamPerfChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Analytics','Technology','Marketing','Sales','Operations','Finance'],
+      datasets: [{ data: [88,82,79,71,68,75], backgroundColor: [PRIMARY, '#9B93C8', SUCCESS, WARNING, INFO, DANGER], borderRadius: 4 }]
+    },
+    options: { ...defaultOpts, indexAxis: 'y', scales: { x: { grid: { color: GRID, lineWidth: 0.5 }, ticks: { color: TEXT2, font: { size: 10 } }, max: 100 }, y: { grid: { display: false }, ticks: { color: TEXT2, font: { size: 10 } } } } }
+  });
+}
+
+let profileInit = false;
+function initProfileCharts() {
+  if (profileInit) return;
+  profileInit = true;
+
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Technical Skill','Leadership','Communication','Problem Solving','Collaboration','Innovation'],
+      datasets: [{
+        label: 'Siti Rahmah',
+        data: [94, 72, 78, 90, 82, 86],
+        borderColor: PRIMARY, backgroundColor: 'rgba(115,103,174,0.15)', borderWidth: 2, pointBackgroundColor: PRIMARY, pointRadius: 3
+      }, {
+        label: 'Role Benchmark',
+        data: [80, 75, 75, 85, 80, 75],
+        borderColor: GRID, backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4,2], pointBackgroundColor: GRID, pointRadius: 2
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: TEXT2, font: { size: 10 }, boxWidth: 8, boxHeight: 8, padding: 12 } } }, scales: { r: { grid: { color: GRID }, ticks: { display: false }, pointLabels: { font: { size: 10 }, color: TEXT2 } } } }
+  });
+
+  new Chart(document.getElementById('perfHistChart'), {
+    type: 'line',
+    data: {
+      labels: ['Q1 22','Q2 22','Q3 22','Q4 22','Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24','Q3 24','Q4 24'],
+      datasets: [{ data: [3.8,3.9,4.0,4.1,4.2,4.3,4.4,4.5,4.5,4.7,4.7,4.8], borderColor: PRIMARY, backgroundColor: 'rgba(115,103,174,0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: PRIMARY }]
+    },
+    options: { ...defaultOpts, scales: { x: { grid: { display: false }, ticks: { color: TEXT2, font: { size: 9 } } }, y: { min: 3.5, max: 5.0, grid: { color: GRID, lineWidth: 0.5 }, ticks: { color: TEXT2, font: { size: 10 } } } } }
+  });
+}
+
+
+// ========== ROLE FIT AI ==========
+const rfData = [
+  {av:'SR', name:'Siti Rahmah binti Ahmad',  dept:'Analytics',   curr:'Senior Data Analyst',
+   bg:'#EAE8F7', tc:'#7367AE', lp:88, risk:'Low',   rc:'tag-green',
+   roles:[{n:'Lead Analyst',pct:91,c:'var(--success)'},{n:'Head of Analytics',pct:78,c:'var(--info)'},{n:'AI Strategy Mgr',pct:74,c:'var(--primary)'}]},
+  {av:'KL', name:'Khoo Lik Seng',            dept:'Technology',  curr:'Engineering Manager',
+   bg:'#EBF2FF', tc:'#3B82F6', lp:79, risk:'Medium',rc:'tag-orange',
+   roles:[{n:'VP of Technology',pct:85,c:'var(--success)'},{n:'CTO (2-yr path)',pct:68,c:'var(--warning)'},{n:'Product Director',pct:61,c:'var(--primary)'}]},
+  {av:'RH', name:'Razif Hazwan bin Zakaria', dept:'Marketing',   curr:'Marketing Lead',
+   bg:'#EAF7F2', tc:'#2DB27D', lp:84, risk:'Low',   rc:'tag-green',
+   roles:[{n:'Marketing Director',pct:88,c:'var(--success)'},{n:'CMO (stretch)',pct:72,c:'var(--warning)'},{n:'Brand Strategy Head',pct:69,c:'var(--primary)'}]},
+  {av:'AF', name:'Ahmad Farouk bin Hassan',  dept:'Analytics',   curr:'Data Scientist',
+   bg:'#FEF6E4', tc:'#E6A817', lp:76, risk:'High',  rc:'tag-red',
+   roles:[{n:'Head of Data Science',pct:80,c:'var(--success)'},{n:'AI Research Lead',pct:74,c:'var(--warning)'},{n:'ML Engineer Lead',pct:71,c:'var(--primary)'}]},
+  {av:'AN', name:'Amirah Nabilah Rauf',      dept:'Technology',  curr:'Product Manager',
+   bg:'#F5E8FF', tc:'#A855F7', lp:74, risk:'Low',   rc:'tag-green',
+   roles:[{n:'Senior PM',pct:82,c:'var(--success)'},{n:'Head of Product',pct:71,c:'var(--warning)'},{n:'VP Product',pct:60,c:'var(--primary)'}]},
+  {av:'PC', name:'Dr. Priya Chandran',       dept:'Analytics',   curr:'Head of Data Science',
+   bg:'#EAE8F7', tc:'#7367AE', lp:91, risk:'Low',   rc:'tag-green',
+   roles:[{n:'Chief Data Officer',pct:94,c:'var(--success)'},{n:'VP Analytics',pct:88,c:'var(--success)'},{n:'AI Advisory Board',pct:82,c:'var(--primary)'}]},
+];
+
+// Render top-3 cards
+const rfCards = document.getElementById('rf-cards');
+if (rfCards) {
+  rfData.slice(0,3).forEach(e => {
+    rfCards.innerHTML += `
+    <div class="succession-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="emp-avatar" style="background:${e.bg};color:${e.tc};width:40px;height:40px;font-size:13px;border-radius:50%;">${e.av}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-1);">${e.name}</div>
+            <div style="font-size:11px;color:var(--text-3);">${e.curr} &middot; ${e.dept}</div>
+          </div>
+        </div>
+        <span class="tag ${e.rc}">${e.risk} Risk</span>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+          <span style="color:var(--text-2);">Leadership Potential</span>
+          <span style="font-weight:600;color:var(--text-1);">${e.lp}%</span>
+        </div>
+        <div style="height:5px;background:var(--bg);border-radius:3px;overflow:hidden;">
+          <div style="width:${e.lp}%;height:100%;background:var(--primary);border-radius:3px;"></div>
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);margin-bottom:8px;">Top Role Fits</div>
+      ${e.roles.map((r,i) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:11px;font-weight:600;color:var(--text-3);width:14px;">${i+1}</span>
+          <span style="flex:1;font-size:13px;color:var(--text-1);">${r.n}</span>
+          <div style="width:60px;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;">
+            <div style="width:${r.pct}%;height:100%;background:${r.c};border-radius:2px;"></div>
+          </div>
+          <span style="font-size:12px;font-weight:600;color:${r.c};min-width:28px;text-align:right;">${r.pct}%</span>
+        </div>`).join('')}
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:12px;font-size:12px;"
+        onclick="navigate('profile')">View Full Profile</button>
+    </div>`;
+  });
+}
+
+// Render full table
+const rfTbody = document.getElementById('rf-tbody');
+if (rfTbody) {
+  rfData.forEach(e => {
+    const top = e.roles[0];
+    const fc = top.pct >= 85 ? 'var(--success)' : top.pct >= 70 ? 'var(--warning)' : 'var(--danger)';
+    rfTbody.innerHTML += `<tr onclick="navigate('profile')" style="cursor:pointer;">
+      <td><div class="emp-cell">
+        <div class="emp-avatar" style="background:${e.bg};color:${e.tc};">${e.av}</div>
+        <div><div class="emp-name">${e.name}</div><div class="emp-role">${e.dept}</div></div>
+      </div></td>
+      <td>${e.dept}</td>
+      <td style="color:var(--text-1);">${e.curr}</td>
+      <td style="font-weight:500;color:var(--text-1);">${top.n}</td>
+      <td>
+        <div class="score-bar">
+          <div class="score-track"><div class="score-fill" style="width:${top.pct}%;background:${fc};"></div></div>
+          <span class="score-num" style="color:${fc};">${top.pct}</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <div class="score-track"><div class="score-fill" style="width:${e.lp}%;background:var(--primary);"></div></div>
+          <span class="score-num">${e.lp}%</span>
+        </div>
+      </td>
+      <td><span class="tag ${e.rc}">${e.risk}</span></td>
+      <td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;"
+          onclick="event.stopPropagation();navigate('profile')">View</button></td>
+    </tr>`;
+  });
+}
+
+// Init dashboard on load
+window.addEventListener('load', () => {
+  setTimeout(initDashboardCharts, 100);
+});
+</script>
+</body>
+</html>
